@@ -5,16 +5,15 @@ import com.taskmanager.controller.TaskController;
 import com.taskmanager.domain.TaskStatus;
 import com.taskmanager.dto.TaskRequest;
 import com.taskmanager.dto.TaskResponse;
+import com.taskmanager.exception.TaskNotFoundException;
 import com.taskmanager.service.TaskService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.server.ResponseStatusException;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -45,12 +44,12 @@ class TaskControllerTest {
 
     @Test
     void findById_returns404() throws Exception {
-        when(taskService.findById(999L)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+        when(taskService.findById(999L)).thenThrow(new TaskNotFoundException(999L));
 
         mockMvc.perform(get("/api/tasks/999"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.error").value("Not found"));
+                .andExpect(jsonPath("$.error").value("Task not found: 999"));
 
     }
 

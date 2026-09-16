@@ -6,15 +6,16 @@ import com.taskmanager.domain.Task;
 import com.taskmanager.domain.TaskStatus;
 import com.taskmanager.dto.TaskRequest;
 import com.taskmanager.dto.TaskResponse;
+import com.taskmanager.exception.TaskNotFoundException;
 import com.taskmanager.repository.TaskRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class TaskService {
 
     private final TaskRepository taskRepository;
@@ -30,14 +31,17 @@ public class TaskService {
         return TaskResponse.from(taskRepository.save(task));
     }
 
+    @Transactional(readOnly = true)
     public List<TaskResponse> findAll() {
         return taskRepository.findAll(Sort.by(Sort.Direction.DESC,"createdAt")).stream().map(TaskResponse::from).toList();
     }
 
+    @Transactional(readOnly = true)
     public Page<TaskResponse> findAllByPage(Pageable pageable) {
         return taskRepository.findAll(pageable).map(TaskResponse::from);
     }
 
+    @Transactional(readOnly = true)
     public TaskResponse findById(Long id) {
         return TaskResponse.from(getById(id));
     }
@@ -50,7 +54,7 @@ public class TaskService {
 
     public void deleteById(Long id) {
         if (!taskRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            throw new TaskNotFoundException(id);
         }
         taskRepository.deleteById(id);
     }
@@ -61,6 +65,7 @@ public class TaskService {
         return TaskResponse.from(taskRepository.save(task));
     }
 
+    @Transactional(readOnly = true)
     public List<TaskResponse> findByStatus(TaskStatus status) {
         return taskRepository.findByStatusOrderByCreatedAtDesc(status)
                 .stream()
@@ -70,7 +75,7 @@ public class TaskService {
 
     private Task getById(Long id) {
         return taskRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new TaskNotFoundException(id));
     }
 
 }
