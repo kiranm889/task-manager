@@ -1,0 +1,2 @@
+ALTER TABLE task
+    MODIFY title VARCHAR(255) NOT NULL;
