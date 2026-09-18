@@ -25,7 +25,11 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<Map<String, Object>> handleNotFound(ResponseStatusException exception) {
-        return ResponseEntity.status(exception.getStatusCode()).body(Map.of("status", exception.getStatusCode().value(),"error","Not found"));
+        String message = exception.getReason() != null ? exception.getReason() : "Not found";
+        return ResponseEntity.status(exception.getStatusCode()).body(Map.of(
+                "status", exception.getStatusCode().value(),
+                "error", message
+        ));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
